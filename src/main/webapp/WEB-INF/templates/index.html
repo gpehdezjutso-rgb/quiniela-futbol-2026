@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${titulo}">Quiniela</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; text-align: center; padding: 40px; }
+        .container { background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: inline-block; min-width: 500px; }
+        h1 { color: #0066cc; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
+        th { background-color: #f8f9fa; color: #333; }
+        .btn-registro { background-color: #28a745; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none; font-weight: bold; display: inline-block; margin-bottom: 20px; }
+        .btn-registro:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 th:text="${titulo}">Nombre</h1>
+        <p>¡Bienvenido al sistema de predicciones del Mundial!</p>
+        
+        <!-- Botón para ir a la pantalla de registro -->
+        <a th:href="@{/registro}" class="btn-registro">Registrar Nuevo Jugador</a>
+
+        <h3>Tabla de Posiciones</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Posición</th>
+                    <th>Jugador</th>
+                    <th>Correo</th>
+                    <th>Puntos</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Iteramos dinámicamente los usuarios con th:each -->
+                <tr th:each="u, iter : ${usuarios}">
+                    <td th:text="${iter.count}">1</td>
+                    <td th:text="${u.nombre}">Nombre</td>
+                    <td th:text="${u.correoElectronico}">Correo</td>
+                    <td th:text="${u.puntosTotales}">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

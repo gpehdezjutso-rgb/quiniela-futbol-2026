@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Partidos - Admin</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
+        h2, h3 { color: #212529; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
+        .form-inline { display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end; margin-bottom: 30px; background: #e9ecef; padding: 20px; border-radius: 8px; }
+        .form-group { display: flex; flex-direction: column; flex: 1; }
+        label { font-weight: bold; margin-bottom: 5px; color: #495057; font-size: 0.9em; }
+        input, select { padding: 10px; border: 1px solid #ced4da; border-radius: 4px; background-color: white; }
+        .btn { color: white; border: none; padding: 10px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.9em; transition: opacity 0.15s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background-color: #007bff; }
+        .btn-success { background-color: #28a745; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-secondary { background-color: #6c757d; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #6c757d; text-decoration: none; font-weight: 500; }
+        .back-btn:hover { color: #343a40; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { padding: 7px 9px; border-bottom: 1px solid #dee2e6; text-align: left; vertical-align: middle; }
+        th { background-color: #343a40; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f1f3f5; }
+        .input-gol { width: 40px; padding: 4px; text-align: center; border-radius: 4px; border: 1px solid #ccc; font-size: 0.85rem; }
+        .badge-resultado { background-color: #212529; color: #ffc107; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 0.85rem; }
+
+        /* ── MODAL DE CONFIRMACIÓN ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            padding: 28px 32px;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .modal-box h3 { margin: 0 0 8px; color: #212529; }
+        .modal-box p { color: #6c757d; margin: 0 0 22px; font-size: 0.92rem; }
+        .modal-partido { font-weight: bold; color: #212529; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-actions .btn { min-width: 110px; }
+
+        /* ── RESPONSIVO ── */
+        @media (max-width: 700px) {
+            body { padding: 10px; }
+            .container { padding: 16px; }
+            .form-inline { flex-direction: column; }
+            table { font-size: 0.78rem; }
+            th, td { padding: 5px 6px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/admin/dashboard}" class="back-btn">&#8592; Volver al Panel Admin</a>
+
+        <h2>&#127942; ICHI Quiniela &mdash; Cat&#225;logo de Partidos &mdash; Mundial 2026</h2>
+
+        <!-- Formulario alta/edición -->
+        <form th:action="@{/admin/partidos}" th:object="${partido}" method="post" class="form-inline">
+            <input type="hidden" th:field="*{id}" />
+            <input type="hidden" th:field="*{golesLocal}" />
+            <input type="hidden" th:field="*{golesVisitante}" />
+            <table class="form-table" style="background:transparent;margin:0;">
+                <tr>
+                    <td><label>Equipo Local</label></td>
+                    <td>
+                        <select th:field="*{equipoLocal}" required>
+                            <option value="">-- Selecciona país --</option>
+                            <option th:each="est : ${paises}" th:value="${est.nombre.trim()}" th:text="${est.nombre.trim()}"></option>
+                        </select>
+                    </td>
+                    <td><label>Equipo Visitante</label></td>
+                    <td>
+                        <select th:field="*{equipoVisitante}" required>
+                            <option value="">-- Selecciona país --</option>
+                            <option th:each="est : ${paises}" th:value="${est.nombre.trim()}" th:text="${est.nombre.trim()}"></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>Fecha y Hora</label></td>
+                    <td><input type="datetime-local" name="fechaStr" required /></td>
+                    <td><label>Fase</label></td>
+                    <td>
+                        <select th:field="*{fase.id}" required>
+                            <option value="">-- Selecciona fase --</option>
+                            <option th:each="fase : ${fasesActivas}" th:value="${fase.id}" th:text="${fase.nombre}"></option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td><label>Grupo</label></td>
+                    <td>
+                        <select th:field="*{grupo}" required>
+                            <option value="">-- Selecciona grupo --</option>
+                            <option th:each="est : ${grupos}" th:value="${est.trim()}" th:text="${est.trim()}"></option>
+                        </select>
+                    </td>
+                    <td><label>Estadio</label></td>
+                    <td>
+                        <select th:field="*{estadio}" required>
+                            <option value="">-- Selecciona sede --</option>
+                            <option th:each="est : ${estadios}" th:value="${est.nombre}" th:text="${est.nombre}"></option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <button type="submit" class="btn btn-primary" th:text="${partido.id != null} ? 'Actualizar' : 'Registrar'"></button>
+            <a th:if="${partido.id != null}" th:href="@{/admin/partidos}" class="btn btn-secondary">Cancelar</a>
+        </form>
+		
+		<div class="form-inline">
+
+		    <form method="get"
+		          th:action="@{/admin/partidos}">
+
+		        <label>Fase:</label>
+
+		        <select name="faseId"
+		                onchange="this.form.submit()">
+
+		            <option th:each="f : ${fases}"
+		                    th:value="${f.id}"
+		                    th:text="${f.nombre}"
+		                    th:selected="${f.id == faseSeleccionada}">
+		            </option>
+
+		        </select>
+
+		    </form>
+
+		</div>
+
+        <h3>&#128197; Encuentros Programados</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Local</th>
+                    <th>Marcador Oficial</th>
+					<th></th>
+                    <th>Visitante</th>
+                    <th>Fecha y Hora</th>
+                    <th>Fase</th>
+                    <th>Grupo</th>
+                    <th>Estadio</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${partidos}">
+                    <td th:text="${p.id}" style="font-family:monospace;color:#6c757d;"></td>
+                    <td th:text="${p.equipoLocal != null ? p.equipoLocal : '-'}"></td>
+                    <td>
+                        <form th:action="@{/admin/partidos/resultado}" method="post" style="display:flex;gap:5px;align-items:center;">
+                            <input type="hidden" name="partidoId" th:value="${p.id}" />
+                            <input type="number" name="golesLocal" th:value="${p.golesLocal}"  min="0" placeholder="L" required class="input-gol" />
+                            <span style="font-weight:bold;">-</span>
+                            <input type="number" name="golesVisitante" th:value="${p.golesVisitante}" min="0" placeholder="V" required class="input-gol" />
+                            <button type="submit" class="btn btn-success" style="padding:5px 9px;font-size:0.78rem;">&#10004; Editar</button>
+							
+                        </form>
+                        
+                    </td>
+					<td>
+					    <form th:action="@{/admin/partidos/resultado/eliminar}" method="post" style="display:flex;gap:5px;align-items:center;">
+					        <input type="hidden" name="partidoId" th:value="${p.id}" />					        
+					        <button type="submit" class="btn btn-warning" style="padding:5px 9px;font-size:0.78rem;">&#10004; Eliminar marcador</button>							
+					    </form>					    
+					</td>
+                    <td th:text="${p.equipoVisitante != null ? p.equipoVisitante : '-'}"></td>
+                    <td th:text="${p.fechaPartido != null ? #temporals.format(p.fechaPartido, 'dd/MM/yy HH:mm') : '-'}"></td>
+                    <td th:text="${p.fase != null ? p.fase.nombre : '—'}"></td>
+                    <td th:text="${p.grupo != null ? p.grupo : '-'}"></td>
+                    <td th:text="${p.estadio != null ? p.estadio : '-'}"></td>                 
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── MODAL CONFIRMACIÓN ELIMINAR PARTIDO ── -->
+    <div class="modal-overlay" id="modalEliminar">
+        <div class="modal-box">
+            <div class="modal-icon">&#9888;&#65039;</div>
+            <h3>¿Eliminar partido?</h3>
+            <p>Est&#225;s a punto de eliminar <span class="modal-partido" id="modalNombrePartido"></span>.<br>
+            Esta acci&#243;n no se puede deshacer.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <form id="formEliminarPartido" action="/admin/partidos/eliminar" method="post" style="display:inline;">
+                    <input type="hidden" id="inputIdPartido" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">S&#237;, eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Delegación de eventos: un solo listener para todos los botones de eliminar
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-eliminar-partido');
+            if (btn) {
+                var id     = btn.getAttribute('data-id');
+                var nombre = btn.getAttribute('data-nombre');
+                document.getElementById('modalNombrePartido').textContent = nombre;
+                document.getElementById('inputIdPartido').value = id;
+                document.getElementById('modalEliminar').classList.add('active');
+            }
+        });
+        function cerrarModal() {
+            document.getElementById('modalEliminar').classList.remove('active');
+        }
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+    </script>
+</body>
+</html>

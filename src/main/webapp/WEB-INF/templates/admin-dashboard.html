@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICHI Quiniela - Panel de Administración - Mundial 2026</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
+
+        /* ── NAVBAR ── */
+        .navbar { background-color: #212529; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h2 { margin: 0; color: #ffc107; font-size: 1.1rem; }
+        .logout-btn { color: white; text-decoration: none; background-color: #dc3545; padding: 8px 15px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
+
+        /* ── CONTENIDO ── */
+        .main-content { padding: 30px; max-width: 1100px; margin: 0 auto; }
+
+        /* ── BIENVENIDA ── */
+        .welcome-admin {
+            background: linear-gradient(135deg, #212529, #343a40);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 10px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .welcome-admin .icon { font-size: 2rem; }
+        .welcome-admin h3 { margin: 0 0 4px; font-size: 1.1rem; }
+        .welcome-admin p { margin: 0; color: #adb5bd; font-size: 0.88rem; }
+        .welcome-admin .badge-admin {
+            margin-left: auto;
+            background-color: #ffc107;
+            color: #212529;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        /* ── ALERTA ÉXITO ── */
+        .alert-success {
+            background-color: #d4edda; color: #155724;
+            padding: 12px 18px; border-radius: 6px;
+            margin-bottom: 20px; font-weight: 600;
+            border-left: 4px solid #28a745;
+        }
+
+        /* ── MÉTRICAS ── */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .metric-icon { font-size: 1.6rem; }
+        .metric-value { font-size: 2rem; font-weight: bold; line-height: 1; color: #212529; }
+        .metric-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; font-weight: 600; }
+        .metric-card.blue .metric-value { color: #0066cc; }
+        .metric-card.green .metric-value { color: #28a745; }
+        .metric-card.orange .metric-value { color: #fd7e14; }
+        .metric-card.purple .metric-value { color: #6f42c1; }
+        .metric-card.dark .metric-value { color: #343a40; }
+
+        /* ── SECCIÓN DE ACCIONES ── */
+        .section-title {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
+            color: #6c757d; font-weight: 700; margin: 0 0 14px;
+        }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 28px; }
+        .card {
+            background-color: white;
+            padding: 24px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .card-header-row { display: flex; align-items: center; gap: 10px; }
+        .card-icon { font-size: 1.5rem; }
+        .card h3 { margin: 0; color: #212529; font-size: 0.98rem; }
+        .card p { color: #6c757d; font-size: 0.85rem; margin: 0; flex: 1; }
+        .btn-action {
+            display: inline-block; text-align: center;
+            background-color: #007bff; color: white;
+            text-decoration: none; padding: 10px 18px;
+            border-radius: 6px; font-weight: bold; font-size: 0.88rem;
+            border: none; cursor: pointer; transition: background 0.15s;
+        }
+        .btn-action:hover { background-color: #0056b3; }
+        .btn-action.green { background-color: #28a745; }
+        .btn-action.green:hover { background-color: #1e7e34; }
+        .btn-action.orange { background-color: #fd7e14; }
+        .btn-action.orange:hover { background-color: #e8680d; }
+		.btn-action.gray { background-color: #808080; }
+		.btn-action.gray:hover { background-color: #808080; }
+
+        /* ── RESPONSIVO ── */
+        @media (max-width: 600px) {
+            .main-content { padding: 16px; }
+            .navbar { padding: 12px 16px; }
+            .welcome-admin { flex-wrap: wrap; }
+            .welcome-admin .badge-admin { margin-left: 0; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>&#9881;&#65039; ICHI Quiniela &mdash; Panel de Control &mdash; Administraci&#243;n</h2>
+        <a th:href="@{/logout}" class="logout-btn">Cerrar Sesi&#243;n</a>
+    </div>
+
+    <div class="main-content">
+
+        <!-- Bienvenida -->
+        <div class="welcome-admin">
+            <div class="icon">&#128081;</div>
+            <div>
+                <h3>Bienvenido, <span th:text="${nombreUsuario}">Admin</span></h3>
+                <p>Tienes acceso completo para gestionar el torneo.</p>
+            </div>
+            <span class="badge-admin">&#128274; ADMINISTRADOR</span>
+        </div>
+
+        <!-- Alerta de éxito al calcular puntos -->
+        <div class="alert-success" th:if="${param.calculoExitoso != null}">
+            &#9989; &nbsp;¡Tabla de posiciones recalculada con éxito!
+        </div>
+
+        <!-- ── MÉTRICAS ── -->
+        <p class="section-title">Resumen del torneo</p>
+        <div class="metrics-grid">
+            <div class="metric-card blue">
+                <span class="metric-icon">&#128101;</span>
+                <span class="metric-value" th:text="${totalUsuarios}">0</span>
+                <span class="metric-label">Jugadores registrados</span>
+            </div>
+            <div class="metric-card dark">
+                <span class="metric-icon">&#128197;</span>
+                <span class="metric-value" th:text="${totalPartidos}">0</span>
+                <span class="metric-label">Partidos en calendario</span>
+            </div>
+            <div class="metric-card green">
+                <span class="metric-icon">&#9989;</span>
+                <span class="metric-value" th:text="${partidosConResultado}">0</span>
+                <span class="metric-label">Partidos con resultado</span>
+            </div>
+            <div class="metric-card orange">
+                <span class="metric-icon">&#9203;</span>
+                <span class="metric-value" th:text="${partidosPendientes}">0</span>
+                <span class="metric-label">Partidos por jugar</span>
+            </div>
+            <div class="metric-card purple">
+                <span class="metric-icon">&#127919;</span>
+                <span class="metric-value" th:text="${totalPredicciones}">0</span>
+                <span class="metric-label">Pronósticos registrados</span>
+            </div>
+        </div>
+
+        <!-- ── ACCIONES ── -->
+        <p class="section-title">Herramientas de administración</p>
+        <div class="menu-grid">
+
+            <div class="card">
+                <div class="card-header-row">
+                    <span class="card-icon">&#127942;</span>
+                    <h3>Cat&#225;logo de Partidos</h3>
+                </div>
+                <p>Registra partidos del Mundial 2026, gestiona horarios y actualiza los marcadores oficiales.</p>
+                <a th:href="@{/admin/partidos}" class="btn-action">Gestionar Partidos</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header-row">
+                    <span class="card-icon">&#128101;</span>
+                    <h3>Control de Usuarios</h3>
+                </div>
+                <p>Visualiza la lista completa de jugadores inscritos, edita perfiles o elimina cuentas.</p>
+                <a th:href="@{/admin/usuarios}" class="btn-action gray">Ver Usuarios</a>
+            </div>
+
+            <div class="card">
+                <div class="card-header-row">
+                    <span class="card-icon">&#128200;</span>
+                    <h3>Procesar Puntos</h3>
+                </div>
+                <p>Ejecuta el algoritmo de c&#225;lculo para actualizar la tabla de posiciones con los marcadores reales.</p>
+                <form th:action="@{/admin/puntos/calcular}" method="post">
+                    <button type="submit" class="btn-action green" style="width:100%;">
+                        &#9654; Calcular Tabla Ahora
+                    </button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="card-header-row">
+                    <span class="card-icon">&#128218;</span>
+                    <h3>Cat&#225;logos</h3>
+                </div>
+                <p>Administra los cat&#225;logos del aplicativo: fases, estadios, pa&#237;ses y grupos.</p>
+                <a th:href="@{/admin/catalogos}" class="btn-action orange">Gestionar Cat&#225;logos</a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

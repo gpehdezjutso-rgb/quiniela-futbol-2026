@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Usuarios - Admin</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; }
+        .container { max-width: 1050px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.07); }
+        h2, h3 { color: #212529; border-bottom: 2px solid #f4f7f6; padding-bottom: 10px; }
+        label { font-weight: bold; margin-bottom: 5px; color: #495057; font-size: 0.88em; display: block; }
+        input, select { padding: 9px 10px; border: 1px solid #ced4da; border-radius: 4px; background-color: white; width: 100%; }
+        .btn { color: white; border: none; padding: 9px 18px; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; font-size: 0.88em; transition: opacity 0.15s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background-color: #007bff; }
+        .btn-warning { background-color: #ffc107; color: #212529; }
+        .btn-danger { background-color: #dc3545; }
+        .btn-secondary { background-color: #6c757d; }
+        .back-btn { display: inline-block; margin-bottom: 20px; color: #6c757d; text-decoration: none; font-weight: 500; }
+        .back-btn:hover { color: #343a40; }
+
+        /* ── FORMULARIO EDICIÓN ── */
+        .edit-form-card {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 8px;
+            padding: 20px 22px;
+            margin-bottom: 24px;
+        }
+        .edit-form-card h4 { margin: 0 0 16px; color: #856404; font-size: 0.95rem; }
+        .edit-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: end; }
+
+        /* ── TABLA ── */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { padding: 7px 10px; border-bottom: 1px solid #dee2e6; text-align: left; vertical-align: middle; }
+        th { background-color: #343a40; color: white; font-weight: 600; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.5px; }
+        tr:hover { background-color: #f1f3f5; }
+        .badge-rol {
+            display: inline-block; padding: 3px 8px; border-radius: 4px;
+            font-size: 0.75rem; font-weight: bold; font-family: monospace;
+        }
+        .badge-admin { background-color: #dc3545; color: white; }
+        .badge-user { background-color: #6c757d; color: white; }
+
+        /* ── MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            border-radius: 10px;
+            padding: 28px 32px;
+            max-width: 430px;
+            width: 90%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .modal-icon { font-size: 2.5rem; margin-bottom: 12px; }
+        .modal-box h3 { margin: 0 0 8px; color: #212529; }
+        .modal-box p { color: #6c757d; margin: 0 0 8px; font-size: 0.92rem; }
+        .modal-warning { background-color: #f8d7da; color: #721c24; padding: 9px 12px; border-radius: 5px; font-size: 0.84rem; margin-bottom: 18px; }
+        .modal-nombre { font-weight: bold; color: #212529; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-actions .btn { min-width: 110px; }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .container { padding: 16px; }
+            .edit-form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a th:href="@{/admin/dashboard}" class="back-btn">&#8592; Volver al Panel Admin</a>
+
+        <h2>&#128101; ICHI Quiniela &mdash; Control de Usuarios</h2>
+
+        <!-- Formulario edición (solo visible si se seleccionó un usuario) -->
+        <div class="edit-form-card" th:if="${usuario.id != null}">
+            <h4>&#9999;&#65039; Editar perfil de usuario</h4>
+            <form th:action="@{/admin/usuarios}" th:object="${usuario}" method="post">
+                <input type="hidden" th:field="*{id}" />
+                <div class="edit-form-grid">
+                    <div>
+                        <label>Nombre Completo</label>
+                        <input type="text" th:field="*{nombre}" required />
+                    </div>
+                    <div>
+                        <label>Correo Electr&#243;nico</label>
+                        <input type="email" th:field="*{correoElectronico}" required />
+                    </div>
+                    <div>
+                        <label>Contrase&#241;a <small style="color:#999;">(dejar en blanco = sin cambios)</small></label>
+                        <input type="password" th:field="*{password}" placeholder="Nueva contraseña" />
+                    </div>
+                    <div>
+                        <label>Rol del Usuario</label>
+                        <select th:field="*{rol}" required>
+                            <option value="USER">USER (Jugador)</option>
+                            <option value="ADMIN">ADMIN (Administrador)</option>
+                        </select>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:flex-end;">
+                        <button type="submit" class="btn btn-primary" style="flex:1;">Actualizar</button>
+                        <a th:href="@{/admin/usuarios}" class="btn btn-secondary" style="flex:1;text-align:center;">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <h3>&#128203; Padr&#243;n de Jugadores Inscritos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:60px;">ID</th>
+                    <th>Nombre</th>
+                    <th>Correo Electr&#243;nico</th>
+                    <th style="text-align:center;">Rol</th>
+                    <th style="text-align:center;">Puntos</th>
+                    <th style="text-align:center;width:170px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="u : ${usuarios}">
+                    <td style="font-family:monospace;color:#6c757d;" th:text="${u.id}"></td>
+                    <td style="font-weight:600;" th:text="${u.nombre}"></td>
+                    <td th:text="${u.correoElectronico}"></td>
+                    <td style="text-align:center;">
+                        <span th:text="${u.rol}"
+                              th:classappend="${u.rol == 'ADMIN'} ? 'badge-rol badge-admin' : 'badge-rol badge-user'"></span>
+                    </td>
+                    <td style="text-align:center;font-weight:bold;color:#0066cc;" th:text="${u.puntosTotales}">0</td>
+                    <td style="text-align:center;">
+                        <div style="display:inline-flex;gap:6px;">
+                            <a th:href="@{/admin/usuarios(editarId=${u.id})}" class="btn btn-warning" style="padding:5px 9px;font-size:0.78rem;">Editar</a>
+                            <button type="button" class="btn btn-danger btn-eliminar-usuario" style="padding:5px 9px;font-size:0.78rem;"
+                                    th:data-id="${u.id}"
+                                    th:data-nombre="${u.nombre}">
+                                Eliminar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ── MODAL CONFIRMACIÓN ELIMINAR USUARIO ── -->
+    <div class="modal-overlay" id="modalEliminar">
+        <div class="modal-box">
+            <div class="modal-icon">&#9888;&#65039;</div>
+            <h3>¿Eliminar usuario?</h3>
+            <p>Est&#225;s a punto de eliminar a <span class="modal-nombre" id="modalNombreUsuario"></span>.</p>
+            <div class="modal-warning">
+                &#128274; Se eliminar&#225;n también todos sus pron&#243;sticos registrados. Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                <form id="formEliminarUsuario" action="/admin/usuarios/eliminar" method="post" style="display:inline;">
+                    <input type="hidden" id="inputIdUsuario" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">S&#237;, eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-eliminar-usuario');
+            if (btn) {
+                var id     = btn.getAttribute('data-id');
+                var nombre = btn.getAttribute('data-nombre');
+                document.getElementById('modalNombreUsuario').textContent = nombre;
+                document.getElementById('inputIdUsuario').value = id;
+                document.getElementById('modalEliminar').classList.add('active');
+            }
+        });
+        function cerrarModal() {
+            document.getElementById('modalEliminar').classList.remove('active');
+        }
+        document.getElementById('modalEliminar').addEventListener('click', function(e) {
+            if (e.target === this) cerrarModal();
+        });
+    </script>
+</body>
+</html>

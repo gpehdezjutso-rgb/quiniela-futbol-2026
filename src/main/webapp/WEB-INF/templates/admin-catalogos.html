@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org" lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Catálogos - Admin</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f8f9fa;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+}
+
+h2,h3{
+    color:#212529;
+    border-bottom:2px solid #f4f7f6;
+    padding-bottom:10px;
+}
+
+.back-btn{
+    display:inline-block;
+    margin-bottom:20px;
+    color:#6c757d;
+    text-decoration:none;
+    font-weight:500;
+}
+
+.back-btn:hover{
+    color:#343a40;
+}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:25px;
+}
+
+.tab-btn{
+    padding:10px 18px;
+    text-decoration:none;
+    border-radius:6px;
+    border:1px solid #ced4da;
+    background:#f8f9fa;
+    color:#212529;
+    font-weight:bold;
+}
+
+.tab-btn.active{
+    background:#007bff;
+    color:white;
+}
+
+.form-inline{
+    display:flex;
+    flex-wrap:wrap;
+    gap:15px;
+    align-items:flex-end;
+    margin-bottom:30px;
+    background:#e9ecef;
+    padding:20px;
+    border-radius:8px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+}
+
+label{
+    font-weight:bold;
+    margin-bottom:5px;
+    color:#495057;
+    font-size:0.9em;
+}
+
+input{
+    padding:10px;
+    border:1px solid #ced4da;
+    border-radius:4px;
+}
+
+.btn{
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:4px;
+    font-weight:bold;
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-block;
+    font-size:0.9em;
+}
+
+.btn-primary{
+    background-color:#007bff;
+}
+
+.btn-warning{
+    background-color:#ffc107;
+    color:#212529;
+}
+
+.btn-danger{
+    background-color:#dc3545;
+}
+
+.btn-secondary{
+    background-color:#6c757d;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #dee2e6;
+    text-align:left;
+}
+
+th{
+    background-color:#343a40;
+    color:white;
+}
+
+tr:hover{
+    background-color:#f1f3f5;
+}
+
+/* Modal */
+
+.modal-overlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.5);
+    z-index:1000;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-overlay.active{
+    display:flex;
+}
+
+.modal-box{
+    background:white;
+    border-radius:10px;
+    padding:28px 32px;
+    width:90%;
+    max-width:420px;
+    text-align:center;
+}
+
+.modal-icon{
+    font-size:2.5rem;
+    margin-bottom:10px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+}
+
+.registro-nombre{
+    font-weight:bold;
+}
+
+@media(max-width:700px){
+
+    body{
+        padding:10px;
+    }
+
+    .container{
+        padding:15px;
+    }
+
+    .form-inline{
+        flex-direction:column;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a th:href="@{/admin/dashboard}" class="back-btn">
+        &#8592; Volver al Panel Admin
+    </a>
+
+    <h2>&#128218; ICHI Quiniela &mdash; Catálogos del Sistema</h2>
+
+    <!-- Tabs -->
+
+    <div class="tabs">
+
+        <a th:href="@{/admin/catalogos(tab='paises')}"
+           th:class="${tab == 'paises'} ? 'tab-btn active' : 'tab-btn'">
+
+            Países
+
+        </a>
+
+        <a th:href="@{/admin/catalogos(tab='fases')}"
+           th:class="${tab == 'fases'} ? 'tab-btn active' : 'tab-btn'">
+
+            Fases
+
+        </a>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- PANEL PAISES -->
+    <!-- ===================== -->
+
+    <div th:if="${tab == 'paises'}">
+
+		<form th:action="@{/admin/catalogos/paises}"
+		      th:object="${paisAlta}"
+		      method="post"
+		      class="form-inline">
+
+		    <input type="hidden" th:field="*{id}" />
+
+		    <div class="form-group">
+
+		        <label>Nombre del País</label>
+
+		        <input type="text"
+		               th:field="*{nombre}"
+		               required />
+
+		    </div>
+
+		    <div class="form-group">
+
+		        <label>Estado</label>
+
+		        <select th:field="*{estado}">
+
+		            <option value="ACTIVO">Activo</option>
+		            <option value="INACTIVO">Inactivo</option>
+					<option value="INACTIVO">Eliminado</option>
+
+		        </select>
+
+		    </div>
+
+		    <button type="submit"
+		            class="btn btn-primary">
+
+		        Guardar
+
+		    </button>
+
+		</form>
+
+        <h3>&#127758; Catálogo de Países</h3>
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>País</th>
+                <th>Estado</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="pais : ${paises}">
+
+                <td th:text="${pais.id}"></td>
+
+                <td th:text="${pais.nombre}"></td>
+
+				<td>
+
+				    <form th:action="@{/admin/catalogos/paises/estado}"
+				          method="post">
+
+				        <input type="hidden"
+				               name="id"
+				               th:value="${pais.id}" />
+
+				        <select name="estado"
+				                onchange="this.form.submit()">
+
+				            <option value="Inactivo"
+				                    th:selected="${pais.estado == 'Inactivo'}">
+				                Inactivo
+				            </option>
+
+				            <option value="Activo"
+				                    th:selected="${pais.estado == 'Activo'}">
+				                Activo
+				            </option>
+							
+							<option value="Eliminado"
+				                    th:selected="${pais.estado == 'Eliminado'}">
+				                Eliminado
+				            </option>
+
+				        </select>
+
+				    </form>
+
+				</td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- ===================== -->
+    <!-- PANEL FASES -->
+    <!-- ===================== -->
+
+    <div th:if="${tab == 'fases'}">
+
+        <form th:action="@{/admin/catalogos/fases}"
+              th:object="${fase}"
+              method="post"
+              class="form-inline">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <div class="form-group">
+
+                <label>Nombre de la Fase</label>
+
+                <input type="text"
+                       th:field="*{nombre}"
+                       required />
+
+            </div>
+			
+			<div class="form-group">
+
+                <label>Estatus de la Fase:</label>
+
+				<select th:field="*{estado}" required>
+                    <option value="">-- Selecciona estatus --</option>
+                    <option th:each="est : ${faseEstatus}" th:value="${est.trim()}" th:text="${est.trim()}"></option>
+                </select>
+
+            </div>
+			
+			<div class="form-group">
+
+                <label>Orden de la Fase</label>
+
+                <input type="text"
+                       th:field="*{ordenFase}"
+                       required />
+
+            </div>			
+
+            <button type="submit"
+                    class="btn btn-primary"
+                    th:text="${fase.id != null} ? 'Actualizar' : 'Registrar'">
+            </button>
+
+        </form>
+
+        <h3>&#127942; Catálogo de Fases</h3>
+
+        <table>
+
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Fase</th>
+				<th>Estatus</th>                
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="fase : ${fases}">
+
+                <td th:text="${fase.id}"></td>
+
+                <td th:text="${fase.nombre}"></td>
+				<td>
+
+				    <form th:action="@{/admin/catalogos/fases/estado}"
+				          method="post">
+
+				        <input type="hidden"
+				               name="id"
+				               th:value="${fase.id}" />
+
+				        <select name="estado">
+
+				            <option th:each="estado : ${faseEstatus}"
+				                    th:value="${estado}"
+				                    th:text="${estado}"
+				                    th:selected="${estado == fase.estado}">
+				            </option>
+
+				        </select>
+
+				        <button type="submit"
+				                class="btn btn-primary">
+
+				            Guardar
+
+				        </button>
+
+				    </form>
+
+				</td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<!-- MODAL -->
+
+</body>
+</html>
+```
