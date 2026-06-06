@@ -13,7 +13,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -q
 
 # ── STAGE 2: Runtime ──────────────────────────────────────────────────────────
-FROM tomcat:10.1-jdk17
+FROM tomcat:9.0-jdk17
 
 # Limpiar apps de ejemplo de Tomcat
 RUN rm -rf /usr/local/tomcat/webapps/*
